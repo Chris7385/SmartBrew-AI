@@ -54,8 +54,16 @@ public partial class MainWindow : Window
     private static readonly Brush Muted = Brush("#A9BEC2");
     private static readonly Brush Gold = Brush("#E5AF69");
     private static readonly Brush Panel = Brush("#1D3039");
+    /// <summary>
+    /// Converts a hexadecimal color string into a WPF brush.
+    /// </summary>
+    /// <param name="color">Color code or optional text color.</param>
+    /// <returns>A WPF Brush instance.</returns>
     private static Brush Brush(string color) => (Brush)new BrushConverter().ConvertFromString(color)!;
 
+    /// <summary>
+    /// Initializes the coffee machine window, demo data, and interface.
+    /// </summary>
     public MainWindow()
     {
         InitializeComponent();
@@ -66,8 +74,23 @@ public partial class MainWindow : Window
         brewTimer.Tick += BrewTick;
         Menu();
     }
+    /// <summary>
+    /// Creates a styled text label.
+    /// </summary>
+    /// <param name="value">Text to display or initial input value.</param>
+    /// <param name="font">Text font size.</param>
+    /// <param name="color">Color code or optional text color.</param>
+    /// <param name="bold">Whether to use bold text.</param>
+    /// <returns>A configured TextBlock.</returns>
     private TextBlock Text(string value, int font = 16, Brush? color = null, bool bold = false)
         => new() { Text = value, Foreground = color ?? Fore, FontSize = font, FontWeight = bold ? FontWeights.SemiBold : FontWeights.Normal, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 4, 0, 8) };
+    /// <summary>
+    /// Creates a styled button and attaches its click action.
+    /// </summary>
+    /// <param name="label">Button caption.</param>
+    /// <param name="click">Action invoked when the button is clicked.</param>
+    /// <param name="primary">Whether the button uses primary styling.</param>
+    /// <returns>A configured Button.</returns>
     private Button Button(string label, Action click, bool primary = false)
     {
         var b = new Button { Content = label, FontSize = 15, FontWeight = FontWeights.SemiBold, Foreground = primary ? Brush("#1D2428") : Fore,
@@ -76,7 +99,17 @@ public partial class MainWindow : Window
         b.Click += (_, _) => { if (!brewing) click(); };
         return b;
     }
+    /// <summary>
+    /// Creates a text input field with an optional initial value.
+    /// </summary>
+    /// <param name="value">Text to display or initial input value.</param>
+    /// <returns>A configured TextBox.</returns>
     private TextBox Input(string value = "") => new() { Text = value, FontSize = 16, Padding = new Thickness(10), Margin = new Thickness(0, 5, 0, 13), MinWidth = 220 };
+    /// <summary>
+    /// Creates a dropdown containing the provided choices.
+    /// </summary>
+    /// <param name="choices">Options to show in the dropdown.</param>
+    /// <returns>A configured ComboBox.</returns>
     private ComboBox Options(params string[] choices)
     {
         var c = new ComboBox { FontSize = 16, Height = 38, Margin = new Thickness(0, 5, 0, 14) };
@@ -84,12 +117,30 @@ public partial class MainWindow : Window
         c.SelectedIndex = 0;
         return c;
     }
+    /// <summary>
+    /// Wraps a UI element in a styled card.
+    /// </summary>
+    /// <param name="child">UI element to wrap.</param>
+    /// <returns>A styled Border.</returns>
     private Border Card(UIElement child) => new() { Child = child, Background = Panel, CornerRadius = new CornerRadius(15), Padding = new Thickness(18), Margin = new Thickness(5) };
+    /// <summary>
+    /// Creates a vertical layout panel.
+    /// </summary>
+    /// <returns>A vertical StackPanel.</returns>
     private StackPanel Vertical() => new() { Orientation = Orientation.Vertical };
+    /// <summary>
+    /// Arranges action buttons in a wrapping layout.
+    /// </summary>
+    /// <param name="buttons">Buttons to arrange.</param>
+    /// <returns>A WrapPanel containing the buttons.</returns>
     private WrapPanel Actions(params Button[] buttons)
     {
         var p = new WrapPanel(); foreach (var b in buttons) p.Children.Add(b); return p;
     }
+    /// <summary>
+    /// Constructs the main application layout and navigation.
+    /// </summary>
+    /// <returns>No return value (void).</returns>
     private void BuildShell()
     {
         Root.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(220) });
@@ -115,13 +166,27 @@ public partial class MainWindow : Window
         content = new Grid(); Grid.SetRow(content, 1); main.Children.Add(content);
         Grid.SetColumn(main, 1); Root.Children.Add(main); RefreshStatus();
     }
+    /// <summary>
+    /// Updates the status panel with demo information and inventory.
+    /// </summary>
+    /// <returns>No return value (void).</returns>
     private void RefreshStatus() => status.Text = $"Signed in: {currentUser}\nWeather: {currentWeather}\nTop today: {topToday}\n\nBeans: {stock["Beans"]} | Milk: {stock["Milk"]}\nWater: {stock["Water"]} | Cups: {stock["Cups"]}\nWaste: {waste}/20\n\n" + (offline ? "OFFLINE DEMO" : "READY · DEMO MODE");
+    /// <summary>
+    /// Creates the standard page heading and description layout.
+    /// </summary>
+    /// <param name="title">Page heading.</param>
+    /// <param name="description">Page explanatory text.</param>
+    /// <returns>A StackPanel containing the page header.</returns>
     private StackPanel Page(string title, string description)
     {
         header.Text = title; subtitle.Text = description; content.Children.Clear();
         var scroll = new ScrollViewer { VerticalScrollBarVisibility = ScrollBarVisibility.Auto, HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled };
         var p = Vertical(); scroll.Content = p; content.Children.Add(scroll); RefreshStatus(); return p;
     }
+    /// <summary>
+    /// Displays the available beverage menu.
+    /// </summary>
+    /// <returns>No return value (void).</returns>
     private void Menu()
     {
         var p = Page("Choose your coffee", "Select a drink to customize and order. All payments are simulated.");
@@ -139,6 +204,12 @@ public partial class MainWindow : Window
         }
         p.Children.Add(grid);
     }
+    /// <summary>
+    /// Displays drink customization controls, optionally loading a saved recipe.
+    /// </summary>
+    /// <param name="drink">Drink selected for customization.</param>
+    /// <param name="saved">Optional previously saved recipe.</param>
+    /// <returns>No return value (void).</returns>
     private void Customize(Drink drink, Recipe? saved = null)
     {
         selected = drink;
@@ -162,11 +233,23 @@ public partial class MainWindow : Window
         p.Children.Add(Card(grid));
         p.Children.Add(Actions(Button("← Menu", Menu), Button("♡ Save Recipe", SaveRecipe), Button("Continue to Checkout →", Checkout, true)));
     }
+    /// <summary>
+    /// Collects current customization selections into a recipe.
+    /// </summary>
+    /// <returns>The recipe represented by current controls.</returns>
     private Recipe CurrentRecipe() => new(currentUser, recipeName.Text.Trim(), selected.Name,
         size.SelectedItem?.ToString() ?? "Regular", strength.SelectedItem?.ToString() ?? "Normal",
         milk.SelectedItem?.ToString() ?? "Regular", sugar.SelectedItem?.ToString() ?? "None",
         syrup.SelectedItem?.ToString() ?? "None", temperature.SelectedItem?.ToString() ?? "Normal");
+    /// <summary>
+    /// Calculates the current drink price including size adjustments.
+    /// </summary>
+    /// <returns>The calculated price in demo currency units.</returns>
     private int CurrentPrice() => selected.Price + (size.SelectedIndex == 1 ? 5 : 0);
+    /// <summary>
+    /// Validates and saves the current recipe in memory.
+    /// </summary>
+    /// <returns>No return value (void).</returns>
     private void SaveRecipe()
     {
         if (currentUser == "Guest") { MessageBox.Show("Use Quick Demo Login or create an account first."); Account(); return; }
@@ -174,6 +257,11 @@ public partial class MainWindow : Window
         recipes.RemoveAll(x => x.Owner == currentUser && x.Name.Equals(r.Name, StringComparison.OrdinalIgnoreCase));
         recipes.Add(r); MessageBox.Show($"Saved '{r.Name}'! Find it under My Recipes.");
     }
+    /// <summary>
+    /// Checks ingredient availability and returns a reason when brewing is unavailable.
+    /// </summary>
+    /// <param name="reason">Output explanation when brewing cannot proceed.</param>
+    /// <returns>True when stock permits brewing; otherwise false.</returns>
     private bool CanBrew(out string reason)
     {
         bool needsMilk = selected.Milk && milk.SelectedIndex != 3;
@@ -185,6 +273,10 @@ public partial class MainWindow : Window
             needsTea && stock["Tea"] < 2 ? "Not enough tea" : "";
         return reason.Length == 0;
     }
+    /// <summary>
+    /// Displays order details and payment choices.
+    /// </summary>
+    /// <returns>No return value (void).</returns>
     private void Checkout()
     {
         if (!CanBrew(out var reason)) { errors.Add($"{DateTime.Now:g}: {reason}"); MessageBox.Show(reason + ". Open Technician to refill/empty."); return; }
@@ -196,6 +288,10 @@ public partial class MainWindow : Window
         p.Children.Add(payment);
         p.Children.Add(Actions(Button("← Customize", () => Customize(selected, r)), Button("Pay & Brew ☕", Pay, true)));
     }
+    /// <summary>
+    /// Processes the simulated payment and starts brewing.
+    /// </summary>
+    /// <returns>No return value (void).</returns>
     private void Pay()
     {
         if (offline && payment.SelectedIndex != 2) { MessageBox.Show("In offline demo mode, select Prepaid Employee Card."); return; }
@@ -215,6 +311,12 @@ public partial class MainWindow : Window
         progressText = Text("Preparing... 0%", 21); p.Children.Add(progress); p.Children.Add(progressText);
         brewTimer.Start();
     }
+    /// <summary>
+    /// Updates the simulated brewing progress on each timer tick.
+    /// </summary>
+    /// <param name="sender">Timer event source.</param>
+    /// <param name="e">Timer event arguments.</param>
+    /// <returns>No return value (void).</returns>
     private void BrewTick(object? sender, EventArgs e)
     {
         brewPercent += 5;
@@ -227,7 +329,16 @@ public partial class MainWindow : Window
         p.Children.Add(Text($"Enjoy your {latest?.Drink}!", 25, Fore, true));
         p.Children.Add(Actions(Button("View receipt", () => { if (latest != null) ShowReceipt(latest); }), Button("Order another", Menu, true)));
     }
+    /// <summary>
+    /// Displays a receipt for a completed demo order.
+    /// </summary>
+    /// <param name="o">Completed order to display.</param>
+    /// <returns>No return value (void).</returns>
     private void ShowReceipt(Order o) => MessageBox.Show($"SMARTBREW DEMO RECEIPT\n{ o.Time:g}\nUser: {o.Owner}\nDrink: {o.Drink}\nOptions: {o.Details}\nPayment: {o.Payment}\nTotal: {o.Price} SEK\n\nSIMULATED PAYMENT — NO MONEY CHARGED", "Receipt");
+    /// <summary>
+    /// Shows a randomly chosen drink recommendation.
+    /// </summary>
+    /// <returns>No return value (void).</returns>
     private void Recommendation()
     {
         var suggestion = drinks[random.Next(drinks.Count)];
@@ -235,6 +346,10 @@ public partial class MainWindow : Window
         p.Children.Add(Card(Text($"★ Try {suggestion.Name}!\n\n{suggestion.Description}\n{suggestion.Price} SEK", 25, Gold, true)));
         p.Children.Add(Actions(Button("↻ Another random drink", Recommendation), Button("Customize this drink", () => Customize(suggestion), true)));
     }
+    /// <summary>
+    /// Displays and randomizes the Top Today demo drink.
+    /// </summary>
+    /// <returns>No return value (void).</returns>
     private void Top()
     {
         var d = drinks.First(x => x.Name == topToday);
@@ -242,6 +357,10 @@ public partial class MainWindow : Window
         p.Children.Add(Card(Text($"🏆 {d.Name}\n\nToday's featured popular drink (random demo selection).", 25, Gold, true)));
         p.Children.Add(Actions(Button("↻ Randomize Top Today", () => { topToday = drinks[random.Next(drinks.Count)].Name; Top(); }), Button("Order this drink", () => Customize(d), true)));
     }
+    /// <summary>
+    /// Displays login and account registration controls.
+    /// </summary>
+    /// <returns>No return value (void).</returns>
     private void Account()
     {
         var p = Page("Account & Login", "For testing: use demo / demo, or sign in instantly as a demo user.");
@@ -259,6 +378,10 @@ public partial class MainWindow : Window
         }, true), Button("Logout", () => { currentUser = "Guest"; Account(); })));
         p.Children.Add(Text("Demo accounts are stored only in memory and reset when the application closes. Do not use real passwords.", 13, Muted));
     }
+    /// <summary>
+    /// Displays saved recipes and their available actions.
+    /// </summary>
+    /// <returns>No return value (void).</returns>
     private void Recipes()
     {
         var p = Page("My Recipes", "Save a customized drink, then reorder, edit or delete it.");
@@ -275,6 +398,10 @@ public partial class MainWindow : Window
         }
         p.Children.Add(Button("+ Create a new recipe", Menu));
     }
+    /// <summary>
+    /// Displays the current session order history.
+    /// </summary>
+    /// <returns>No return value (void).</returns>
     private void History()
     {
         var p = Page("Order History", "View orders made during this application session.");
@@ -287,6 +414,10 @@ public partial class MainWindow : Window
             row.Children.Add(Button("View receipt", () => ShowReceipt(o))); p.Children.Add(Card(row));
         }
     }
+    /// <summary>
+    /// Displays technician tools and inventory maintenance controls.
+    /// </summary>
+    /// <returns>No return value (void).</returns>
     private void Technician()
     {
         var p = Page("Technician Panel", "Demo PIN: 2468. Refill ingredients and manage machine status.");
@@ -304,6 +435,10 @@ public partial class MainWindow : Window
         p.Children.Add(Text(errors.Count == 0 ? "No errors recorded." : string.Join("\n", errors.TakeLast(12)), 15));
         p.Children.Add(Button("Lock technician panel", () => { technicianUnlocked = false; Technician(); }));
     }
+    /// <summary>
+    /// Displays the demo instructions and test utilities.
+    /// </summary>
+    /// <returns>No return value (void).</returns>
     private void Guide()
     {
         var p = Page("Demo Guide", "Quick steps for demonstrating your Task B prototype.");
