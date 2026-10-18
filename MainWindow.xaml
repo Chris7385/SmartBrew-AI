@@ -1,0 +1,3 @@
+<Window x:Class="SmartBrewGUI.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="SmartBrew | Coffee Machine Demo" Width="1200" Height="820" MinWidth="950" MinHeight="650" WindowStartupLocation="CenterScreen" Background="#111C23" FontFamily="Segoe UI">
+  <Grid x:Name="Root"/>
+</Window>
